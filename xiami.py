@@ -49,11 +49,16 @@ def println(text):
     sys.stdout.write(str(text) + '\n')
 
 
-def get_response(url):
+def get_response(url, proxy=''):
     """ Get HTTP response as text
 
     If sent without the headers, there may be a 503/403 error.
     """
+    if ( proxy <> '' ):
+        proxy = urllib2.ProxyHandler({'http': proxy})
+        opener = urllib2.build_opener(proxy)
+        urllib2.install_opener(opener)
+
     request = urllib2.Request(url)
     for header in HEADERS:
         request.add_header(header, HEADERS[header])
@@ -66,8 +71,8 @@ def get_response(url):
         return ''
 
 
-def get_playlist_from_url(url):
-    tracks = parse_playlist(get_response(url))
+def get_playlist_from_url(url, proxy = ''):
+    tracks = parse_playlist(get_response(url, proxy))
     tracks = [
         {
             key: unicode(track[key])
@@ -150,6 +155,8 @@ def parse_arguments():
                         help='save downloads to the directory')
     parser.add_argument('--name-template', default='{id} - {title} - {artist}',
                         help='filename template')
+    parser.add_argument('-x', '--proxy', default='',
+                        help='download throw proxy')
 
     return parser.parse_args()
 
@@ -160,6 +167,7 @@ class XiamiDownloader:
         self.downloader = get_downloader(args.tool)
         self.force_mode = args.force
         self.name_template = args.name_template
+        self.proxy = args.proxy
 
     def format_track(self, trackinfo, current, total):
         trackinfo['track'] = '%s/%s' % (current + 1, total)
@@ -185,7 +193,7 @@ class XiamiDownloader:
             if query_yes_no('File already exists. Skip downloading?') == 'yes':
                 return False
         try:
-            self.downloader(url, filename, HEADERS)
+            self.downloader(url, filename, HEADERS, args.proxy)
             return True
         except Exception as e:
             println(u'Error downloading: {}'.format(e))
@@ -205,12 +213,12 @@ def get_album_image_url(basic, size=None):
     return re.sub(r'^(.+)_\d(\..+)$', rep, basic)
 
 
-def add_id3_tag(filename, track):
+def add_id3_tag(filename, track, proxy=''):
     println('Tagging...')
 
     println('Getting album cover...')
     # 4 for a reasonable size, or leave it None for the largest...
-    image = get_response(get_album_image_url(track['pic'], 4))
+    image = get_response(get_album_image_url(track['pic'], 4), proxy)
 
     musicfile = mutagen.mp3.MP3(filename)
     try:
@@ -277,6 +285,8 @@ def add_id3_tag(filename, track):
 def main():
     args = parse_arguments()
 
+    println(args)
+
     xiami = XiamiDownloader(args)
 
     urls = []
@@ -291,7 +301,7 @@ def main():
     # parse playlist xml for a list of track info
     tracks = []
     for playlist_url in urls:
-        for url in get_playlist_from_url(playlist_url):
+        for url in get_playlist_from_url(playlist_url, args.proxy):
             tracks.append(url)
 
     println('%d file(s) to download' % len(tracks))
@@ -315,7 +325,7 @@ def main():
         downloaded = xiami.download(track['url'], output_file)
 
         if mutagen and downloaded and (not args.no_tag):
-            add_id3_tag(output_file, track)
+            add_id3_tag(output_file, track, args.proxy)
 
 
 if __name__ == '__main__':

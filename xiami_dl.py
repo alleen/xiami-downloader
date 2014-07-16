@@ -18,7 +18,13 @@ def get_downloader(name=None):
     }.get(name, None)
 
 
-def urllib2_downloader(url, dest, headers):
+def urllib2_downloader(url, dest, headers, proxy=''):
+    
+    if ( proxy <> '' ):
+        proxy = urllib2.ProxyHandler({'http': proxy})
+        opener = urllib2.build_opener(proxy)
+        urllib2.install_opener(opener)
+
     request = urllib2.Request(url)
     for h in headers:
         request.add_header(h, headers[h])
@@ -38,10 +44,14 @@ def urllib2_downloader(url, dest, headers):
         sys.stdout.write('\n')
 
 
-def wget_downloader(url, dest, headers):
+def wget_downloader(url, dest, headers, proxy=''):
     wget_opts = ['wget', url, '-O', dest]
     for h in headers:
         wget_opts.append('--header=%s:%s' % (h, headers[h]))
+
+    if (proxy <> '')
+        wget_opts.append('-e use_proxy=yes -e http_proxy=' % (proxy))
+
     exit_code = subprocess.call(wget_opts)
     if exit_code != 0:
         raise Exception('wget exited abnormaly')
