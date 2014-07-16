@@ -49,7 +49,7 @@ def wget_downloader(url, dest, headers, proxy=''):
     for h in headers:
         wget_opts.append('--header=%s:%s' % (h, headers[h]))
 
-    if (proxy <> '')
+    if (proxy <> ''):
         wget_opts.append('-e use_proxy=yes -e http_proxy=' % (proxy))
 
     exit_code = subprocess.call(wget_opts)

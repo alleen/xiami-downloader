@@ -193,7 +193,7 @@ class XiamiDownloader:
             if query_yes_no('File already exists. Skip downloading?') == 'yes':
                 return False
         try:
-            self.downloader(url, filename, HEADERS, args.proxy)
+            self.downloader(url, filename, HEADERS, self.proxy)
             return True
         except Exception as e:
             println(u'Error downloading: {}'.format(e))
@@ -284,8 +284,6 @@ def add_id3_tag(filename, track, proxy=''):
 
 def main():
     args = parse_arguments()
-
-    println(args)
 
     xiami = XiamiDownloader(args)
 
