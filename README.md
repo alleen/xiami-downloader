@@ -23,6 +23,7 @@ Note: this is a python script using python 2.
 * `--no-tag` do not add tag.
 * `--directory` save all downloads into the directory.
 * `--name-template` Filename template.
+* `-x <proxy_host:proxy_port>` Download file throw proxy.
 
 `<song id>`, `<playlist id>` and `<album id>` can be retrived from URLs of Xiami.
 
@@ -72,6 +73,7 @@ This software is distributed under the [MIT License][2].
 * `--no-tag` 不添加 ID3 Tag。
 * `--directory` 将下载到的文件放入该文件夹中。
 * `--name-template` 文件名模版。
+* `-x <代理伺服器:代理伺服器埠>` 下載時透過代理伺服器下載
 
 `<歌曲ID>`、`<精选集ID>` 及 `<专辑ID>` 都可以从对应虾米页面的 URL 中找出。
 
